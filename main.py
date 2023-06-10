@@ -1,4 +1,4 @@
-from machine_learning import detect_dominant_emotion
+from machine_learning import detect_dominant_emotion,get_emotion_from_text
 from data_wrapper import bad_request_for_face,success_response_for_face
 
 from flask import Flask, jsonify
@@ -62,6 +62,20 @@ def upload_file():
 
     return bad_request_for_face()
 
+@app.route('/text',methods=['GET','POST']) #type:ignore
+def text_analysis():
+    if(request.method == 'POST'):
+        if(not request.is_json):
+            return bad_request_for_face()
+        if('text' not in request.json): #type: ignore
+            return bad_request_for_face()
+        text = request.json['text']
+        print(text)
+        return success_response_for_face(get_emotion_from_text(text))
+
+
+    return bad_request_for_face()
+        
 
 @app.route('/') #type: ignore
 def test_route():
