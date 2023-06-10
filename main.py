@@ -24,7 +24,7 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if FIELD_NAME not in request.files:
-            return redirect(request.url)
+            return bad_request_for_face()
         file = request.files[FIELD_NAME]
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
