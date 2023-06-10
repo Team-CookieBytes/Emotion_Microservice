@@ -46,7 +46,7 @@ def upload_file():
         new_file_name = f'Uploaded_face.png'
         new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_file_name)
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            filename = secure_filename(file.filename) #type: ignore
             extension = get_extension(filename)
             print(filename)
             new_file_name = f'Uploaded_face.{extension}'
@@ -69,7 +69,7 @@ def text_analysis():
             return bad_request_for_face()
         if('text' not in request.json): #type: ignore
             return bad_request_for_face()
-        text = request.json['text']
+        text = request.json['text'] #type: ignore
         print(text)
         return success_response_for_face(get_emotion_from_text(text))
 
