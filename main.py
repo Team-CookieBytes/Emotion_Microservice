@@ -5,11 +5,15 @@ from flask import Flask, jsonify
 import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
+import base64
+
 
 UPLOAD_FOLDER = 'temp_face_storage'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','webp'}
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -23,13 +27,24 @@ def upload_file():
     FIELD_NAME = 'face'
     if request.method == 'POST':
         # check if the post request has the file part
+        file  = None
+        image = None
         if FIELD_NAME not in request.files:
-            return bad_request_for_face()
-        file = request.files[FIELD_NAME]
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '' or file.filename is None:
-            return bad_request_for_face()
+            if('face' not in request.form):
+                return bad_request_for_face()
+            data  = request.form['face']
+            data = data[data.find(",")+1:]
+            image = base64.b64decode(data)
+
+        else:
+            file = request.files[FIELD_NAME]
+            # If the user does not select a file, the browser submits an
+            # empty file without a filename.
+            if file.filename == '' or file.filename is None:
+                print("no file in the value")
+                return bad_request_for_face()
+        new_file_name = f'Uploaded_face.png'
+        new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_file_name)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             extension = get_extension(filename)
@@ -37,10 +52,13 @@ def upload_file():
             new_file_name = f'Uploaded_face.{extension}'
             new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_file_name)
             file.save(new_file_path)
-            status,emotion = detect_dominant_emotion(new_file_path)
-            if(not status):
-                return bad_request_for_face()
-            return success_response_for_face(emotion)
+        elif image is not None:
+            with open(new_file_path,'wb+') as f:
+                f.write(image)
+        status,emotion = detect_dominant_emotion(new_file_path)
+        if(not status):
+            return bad_request_for_face()
+        return success_response_for_face(emotion)
 
     return bad_request_for_face()
 
