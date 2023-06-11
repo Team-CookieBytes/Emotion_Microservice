@@ -69,8 +69,15 @@ def text_analysis():
             return bad_request_for_face()
         if('text' not in request.json): #type: ignore
             return bad_request_for_face()
+
         text = request.json['text'] #type: ignore
-        print(text)
+        if(len(text) == 0):
+            print("The text is empty")
+            print(request.json)
+            print(request.data)
+            print(request.form)
+            return bad_request_for_face()
+        print(f"text is :{text}")
         return success_response_for_face(get_emotion_from_text(text))
 
 
